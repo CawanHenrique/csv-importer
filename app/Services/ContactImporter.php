@@ -1,14 +1,17 @@
 <?php
 
+namespace App\Services;
+
 use App\Models\Contact;
 use Illuminate\Support\Facades\Validator;
-use League\Csv\Reader; 
+use League\Csv\Reader;
+use PHPExcel_IOFactory;
 
 class ContactImporter
 {
-    public function import(string $path): array
+    public function import(string $path, string $extension): array
     {
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $extension = strtolower($extension);
 
         if (in_array($extension, ['csv', 'txt'])) {
             $records = $this->readCsv($path);
@@ -24,15 +27,18 @@ class ContactImporter
     private function readCsv(string $path): array
     {
         $csv = Reader::createFromPath($path, 'r');
-        $csv->setHeaderOffset(0); 
+        $csv->setDelimiter(';');
+        $csv->setHeaderOffset(0);
         return iterator_to_array($csv->getRecords());
     }
+
 
     private function readExcel(string $path): array
     {
         $spreadsheet = PHPExcel_IOFactory::load($path);
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray(null, true, true, true);
+
         $header = array_map('strtolower', $rows[1]);
         unset($rows[1]);
 
@@ -53,6 +59,12 @@ class ContactImporter
             'invalid' => 0,
         ];
 
+        $batchSize = 250;
+        $buffer = [];
+        $existingEmails = Contact::pluck('email')->map(fn($e) => strtolower($e))->toArray();
+        $existingEmails = array_flip($existingEmails);
+        $seenEmails = [];
+
         foreach ($records as $row) {
             $summary['total']++;
 
@@ -61,11 +73,13 @@ class ContactImporter
                 'email' => $row['email'] ?? null,
                 'phone' => $row['phone'] ?? null,
                 'birthdate' => $row['birthdate'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
 
             $validator = Validator::make($data, [
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:contacts,email',
+                'email' => 'required|email',
                 'phone' => 'nullable|string|max:20',
                 'birthdate' => 'nullable|date',
             ]);
@@ -75,12 +89,33 @@ class ContactImporter
                 continue;
             }
 
-            try {
-                Contact::create($data);
-                $summary['imported']++;
-            } catch (\Illuminate\Database\QueryException $e) {
+            $emailLower = strtolower($data['email']);
+
+
+            if (isset($existingEmails[$emailLower])) {
                 $summary['duplicates']++;
+                continue;
             }
+
+
+            if (isset($seenEmails[$emailLower])) {
+                $summary['duplicates']++;
+                continue;
+            }
+
+            $seenEmails[$emailLower] = true;
+            $buffer[] = $data;
+
+            if (count($buffer) >= $batchSize) {
+                Contact::insert($buffer);
+                $summary['imported'] += count($buffer);
+                $buffer = [];
+            }
+        }
+
+        if (!empty($buffer)) {
+            Contact::insert($buffer);
+            $summary['imported'] += count($buffer);
         }
 
         return $summary;
