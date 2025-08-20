@@ -12,7 +12,7 @@ class ContactImportController extends Controller
 {
     public function index()
     {
-        $contacts = Contact::latest()->paginate(10);
+        $contacts = Contact::latest()->paginate();
 
         return Inertia::render('Contacts/index', [
             'contacts' => $contacts,
