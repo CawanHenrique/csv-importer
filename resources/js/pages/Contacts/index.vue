@@ -3,11 +3,19 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import FileUploader from '@/components/Contacts/FileUploader.vue';
 import ImportSummary from '@/components/Contacts/ImportSummary.vue';
+import { BreadcrumbItem } from '@/types';
 
 defineProps<{
   contacts: any;
   summary?: any;
 }>();
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Contacts Import',
+        href: '/contacts',
+    },
+];
 
 const form = useForm({
   file: null as File | null
@@ -26,7 +34,7 @@ function submit() {
 <template>
   <Head title="Import Contacts" />
 
-  <AppLayout>
+  <AppLayout :breadcrumbs="breadcrumbs">
     <div class="h-full w-full flex flex-col justify-center items-center p-4">
       
       <div class="w-full max-w-2xl space-y-6">
@@ -36,10 +44,8 @@ function submit() {
         </header>
 
         <FileUploader :form="form" @submit="submit" />
-
         <ImportSummary v-if="$page.props.summary" :summary="$page.props.summary" />
       </div>
-
     </div>
   </AppLayout>
 </template>
