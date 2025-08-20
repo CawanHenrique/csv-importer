@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ContactsTable from '@/components/Contacts/ContactsTable.vue';
+import ContactsTable from '@/components/DashboardContacts/ContactsTable.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
