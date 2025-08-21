@@ -17,6 +17,7 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 Route::middleware(['auth', 'verified'])->group(function(){
     Route::get('/contacts', [ContactImportController::class, 'index'])->name('contacts.index');
     Route::post('/contacts/import', [ContactImportController::class, 'store'])->name('contacts.import');
+    Route::delete('/contacts/delete', [ContactImportController::class, 'destroy'])->name('contacts.destroy');
 });
 
 require __DIR__.'/settings.php';

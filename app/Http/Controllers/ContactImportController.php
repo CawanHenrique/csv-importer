@@ -35,4 +35,10 @@ class ContactImportController extends Controller
 
         return redirect()->route('contacts.index')->with('summary', $summary);
     }
+
+  public function destroy()
+    {
+        Contact::truncate();
+        return redirect()->route('contacts.index')->with('success', 'All contacts have been successfully deleted.');
+    }
 }
