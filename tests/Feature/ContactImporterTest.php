@@ -3,10 +3,6 @@
 use App\Models\Contact;
 use App\Services\ContactImporter;
 
-beforeEach(function () {
-    Contact::truncate();
-});
-
 it('imports valid csv rows', function () {
     $csvContent = "name;email;phone;birthdate\n" .
         "John Doe;john@example.com;123456789;1990-01-01\n" .
