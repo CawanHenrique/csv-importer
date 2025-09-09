@@ -20,7 +20,6 @@ class ContactImporter
         } else {
             throw new \Exception("Formato de arquivo não suportado: $extension");
         }
-
         return $this->processRecords($records);
     }
 
@@ -31,8 +30,8 @@ class ContactImporter
         $csv->setHeaderOffset(0);
         return iterator_to_array($csv->getRecords());
     }
-
-
+    
+    
     private function readExcel(string $path): array
     {
         $spreadsheet = PHPExcel_IOFactory::load($path);
