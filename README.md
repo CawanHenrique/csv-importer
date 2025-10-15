@@ -29,7 +29,7 @@ This project was developed as part of the Alberon technical test.
 ---
 
 ## 🛠️ Tech Stack
-- **Backend:** Laravel 11 (PHP 8.3)
+- **Backend:** Laravel 12 (PHP 8.4)
 - **Frontend:** Vue.js 3 + Inertia.js
 - **Database:** MySQL 8
 - **CSV/Excel Parsing:** `league/csv`, `phpoffice/phpspreadsheet`
@@ -39,15 +39,15 @@ This project was developed as part of the Alberon technical test.
 ## ⚙️ Installation
 
 ### Requirements
-- PHP 8.3+
+- PHP 8.5+
 - Composer
 - Node.js 20+
 - MySQL 8
 
 ### Setup
 ```bash
-git clone https://github.com/<your-username>/csv-contact-importer.git
-cd csv-contact-importer
+git clone https://github.com/CawanHenrique/csv-importer.git
+cd csv-importer
 
 # Backend
 composer install
