@@ -39,7 +39,7 @@ This project was developed as part of the Alberon technical test.
 ## ⚙️ Installation
 
 ### Requirements
-- PHP 8.5+
+- PHP 8.4+
 - Composer
 - Node.js 20+
 - MySQL 8
