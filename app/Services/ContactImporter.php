@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Validator;
 use League\Csv\Reader;
-use PHPExcel_IOFactory;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ContactImporter
 {
@@ -32,10 +32,9 @@ class ContactImporter
         return iterator_to_array($csv->getRecords());
     }
 
-
     private function readExcel(string $path): array
     {
-        $spreadsheet = PHPExcel_IOFactory::load($path);
+        $spreadsheet = IOFactory::load($path);
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray(null, true, true, true);
 
@@ -57,9 +56,11 @@ class ContactImporter
             'imported' => 0,
             'duplicates' => 0,
             'invalid' => 0,
+            'duplicate_items' => [],
+            'invalid_items'   => [],
         ];
 
-        $batchSize = 250;
+        $batchSize = 1000;
         $buffer = [];
         $existingEmails = Contact::pluck('email')->map(fn($e) => strtolower($e))->toArray();
         $existingEmails = array_flip($existingEmails);
@@ -86,23 +87,28 @@ class ContactImporter
 
             if ($validator->fails()) {
                 $summary['invalid']++;
+                $summary['invalid_items'][] = array_merge($row, [
+                    'errors' => implode('; ', $validator->errors()->all())
+                ]);
                 continue;
             }
 
             $emailLower = strtolower($data['email']);
 
-
             if (isset($existingEmails[$emailLower])) {
                 $summary['duplicates']++;
+                $summary['duplicate_items'][] = array_merge($row, [
+                    'errors' => "The email already exists"
+                ]);
                 continue;
             }
-
-
             if (isset($seenEmails[$emailLower])) {
                 $summary['duplicates']++;
+                $summary['duplicate_items'][] = array_merge($row, [
+                    'errors' => "The email already exists"
+                ]);
                 continue;
             }
-
             $seenEmails[$emailLower] = true;
             $buffer[] = $data;
 
