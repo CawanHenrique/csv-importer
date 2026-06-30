@@ -1,0 +1,42 @@
+name: CI Laravel & Vue.js
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Clonar código
+          uses: actions/checkout@v4
+
+        - name: Configuar PHP
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: '8.3'
+            extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_mysql, exif, bcmath
+            coverage: none
+            ini-values: memory_limit=-1
+
+        - name: Instalar dependências Composer
+          run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+        - name: Copiar a .env
+          run: cp .env.example .env
+
+        - name: Gerar chave de aplicação 
+          run: php artisan key:generate 
+          
+        - name: Configurar Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '20'
+        - name: Compilar FrontEnd (React)
+          run: |
+            npm install 
+            npm run build
+
+        
+          
